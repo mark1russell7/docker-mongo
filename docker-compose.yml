@@ -1,0 +1,33 @@
+# MongoDB Docker Compose Configuration
+#
+# Environment variables (with defaults):
+#   MONGO_CONTAINER_NAME  - Container name (default: mongo-db)
+#   MONGO_PORT            - Host port to expose (default: 27017)
+#   MONGO_DB_NAME         - Initial database name (default: app)
+#
+# Usage:
+#   docker compose up -d
+#   docker compose down
+#   docker compose logs -f mongodb
+
+services:
+  mongodb:
+    image: mongo:8.0
+    container_name: ${MONGO_CONTAINER_NAME:-mongo-db}
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    environment:
+      - MONGO_INITDB_DATABASE=${MONGO_DB_NAME:-app}
+    healthcheck:
+      test: mongosh --eval "db.adminCommand('ping')"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:
+  mongodb_config:
