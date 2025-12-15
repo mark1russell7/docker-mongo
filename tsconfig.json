@@ -1,30 +1,4 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "compilerOptions": {
-    "target": "ES2024",
-    "lib": ["ES2024"],
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "resolveJsonModule": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true,
-    "composite": true,
-    "incremental": true,
-    "tsBuildInfoFile": "./node_modules/.tmp/tsbuildinfo.json"
-  },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist"]
+  "extends": "@mark1russell7/cue/ts/config/node.json"
 }

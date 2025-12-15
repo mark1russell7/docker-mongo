@@ -20,6 +20,7 @@
   ],
   "scripts": {
     "build": "tsc -b",
+    "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist",
     "prepare": "npm run build"
   },
@@ -27,8 +28,9 @@
     "mongodb": "^6.12.0"
   },
   "devDependencies": {
+    "typescript": "^5.7.0",
     "@types/node": "^22.10.0",
-    "typescript": "^5.7.0"
+    "@mark1russell7/cue": "github:mark1russell7/cue#main"
   },
   "engines": {
     "node": ">=20"
@@ -42,5 +44,6 @@
     "init",
     "typescript"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "sideEffects": false
 }
