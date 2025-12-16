@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/package",
-  "name": "docker-mongo",
+  "name": "@mark1russell7/docker-mongo",
   "version": "0.1.0",
   "description": "Reusable MongoDB Docker setup with TypeScript utilities for init and seed operations",
   "type": "module",
