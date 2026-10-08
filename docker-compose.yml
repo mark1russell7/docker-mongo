@@ -15,7 +15,8 @@ services:
     image: mongo:8.0
     container_name: ${MONGO_CONTAINER_NAME:-mongo-db}
     ports:
-      - "${MONGO_PORT:-27017}:27017"
+      # Loopback only: this MongoDB has no authentication, so it must not be reachable from the network
+      - "127.0.0.1:${MONGO_PORT:-27017}:27017"
     volumes:
       - mongodb_data:/data/db
       - mongodb_config:/data/configdb
