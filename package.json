@@ -3,7 +3,16 @@
   "name": "@mark1russell7/docker-mongo",
   "version": "0.1.0",
   "description": "Reusable MongoDB Docker setup with TypeScript utilities for init and seed operations",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mark1russell7/docker-mongo.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mark1russell7/docker-mongo/issues"
+  },
+  "homepage": "https://github.com/mark1russell7/docker-mongo#readme",
   "type": "module",
+  "packageManager": "pnpm@12.10.1",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -30,7 +39,7 @@
   "devDependencies": {
     "typescript": "^5.7.0",
     "@types/node": "^22.10.0",
-    "@mark1russell7/cue": "github:mark1russell7/cue#main"
+    "@mark1russell7/cue": "^1.0.2"
   },
   "engines": {
     "node": ">=20"
@@ -46,9 +55,7 @@
   ],
   "license": "MIT",
   "sideEffects": false,
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@mark1russell7/cue"
-    ]
+  "publishConfig": {
+    "access": "public"
   }
 }
