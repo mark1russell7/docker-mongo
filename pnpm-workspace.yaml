@@ -1,4 +1,4 @@
-# pnpm 12 does not install a version that is younger than its minimum release age. cue 1.0.2 is new,
-# so pnpm added it here. Remove the entry when the version is old enough.
 minimumReleaseAgeExclude:
-  - '@mark1russell7/cue@1.0.2'
+  # Our own packages: the release train updates them, so the release age check of pnpm does not apply to them.
+  - '@mark1russell7/*'
+  - '@procedures/*'
