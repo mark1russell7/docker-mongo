@@ -29,7 +29,7 @@
   ],
   "scripts": {
     "build": "tsc -b",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json",
     "clean": "rm -rf dist",
     "prepare": "npm run build",
     "check:conventions": "conventions check",
@@ -40,7 +40,7 @@
   },
   "devDependencies": {
     "@mark1russell7/api-report": "^0.2.0",
-    "@mark1russell7/conventions": "^0.2.0",
+    "@mark1russell7/conventions": "^0.3.0",
     "@mark1russell7/cue": "^1.0.2",
     "@types/node": "^22.10.0",
     "typescript": "^5.7.0"
