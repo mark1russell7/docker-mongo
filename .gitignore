@@ -9,3 +9,6 @@ npm-debug.log*
 package-lock.json.bak
 *.tsbuildinfo
 cue.mod/pkg/
+
+# Build output: the prepare script and the release build it, and npm has each version.
+dist/

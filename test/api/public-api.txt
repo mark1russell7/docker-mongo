@@ -1,0 +1,94 @@
+# The public API of @mark1russell7/docker-mongo
+#
+# The names of each entry of the exports field, and the declaration of each name, without comments
+# and private members. The command `api-report check` compares this file with the built .d.ts files.
+# To accept a change of the API, start the build, then `api-report update`, and review the diff.
+
+## . (dist/index.d.ts): 14 names
+
+type CollectionConfig: dist/types.d.ts#CollectionConfig
+type ConnectionCallback: dist/types.d.ts#ConnectionCallback
+type ConnectionConfig: dist/types.d.ts#ConnectionConfig
+type IndexConfig: dist/types.d.ts#IndexConfig
+type InitConfig: dist/types.d.ts#InitConfig
+type InitResult: dist/types.d.ts#InitResult
+type SeedConfig: dist/types.d.ts#SeedConfig
+type SeedResult: dist/types.d.ts#SeedResult
+createConnection: dist/connect.d.ts#createConnection
+initDatabase: dist/init.d.ts#initDatabase
+initDatabaseWithLogging: dist/init.d.ts#initDatabaseWithLogging
+seedDatabase: dist/seed.d.ts#seedDatabase
+seedDatabaseWithLogging: dist/seed.d.ts#seedDatabaseWithLogging
+withConnection: dist/connect.d.ts#withConnection
+
+## Declarations
+
+### dist/connect.d.ts#createConnection
+export declare function createConnection(config: ConnectionConfig): Promise<{
+    client: MongoClient;
+    db: Db;
+}>;
+
+### dist/connect.d.ts#withConnection
+export declare function withConnection<T>(config: ConnectionConfig, fn: ConnectionCallback<T>): Promise<T>;
+
+### dist/init.d.ts#initDatabase
+export declare function initDatabase(config: InitConfig): Promise<InitResult>;
+
+### dist/init.d.ts#initDatabaseWithLogging
+export declare function initDatabaseWithLogging(config: InitConfig): Promise<InitResult>;
+
+### dist/seed.d.ts#seedDatabase
+export declare function seedDatabase(config: SeedConfig): Promise<SeedResult>;
+
+### dist/seed.d.ts#seedDatabaseWithLogging
+export declare function seedDatabaseWithLogging(config: SeedConfig): Promise<SeedResult>;
+
+### dist/types.d.ts#CollectionConfig
+export interface CollectionConfig {
+    name: string;
+    indexes?: IndexConfig[];
+}
+
+### dist/types.d.ts#ConnectionCallback
+export type ConnectionCallback<T> = (db: Db) => Promise<T>;
+
+### dist/types.d.ts#ConnectionConfig
+export interface ConnectionConfig {
+    uri: string;
+    dbName: string;
+}
+
+### dist/types.d.ts#IndexConfig
+export interface IndexConfig {
+    keys: IndexSpecification;
+    options?: CreateIndexesOptions;
+}
+
+### dist/types.d.ts#InitConfig
+export interface InitConfig {
+    uri: string;
+    dbName: string;
+    collections: CollectionConfig[];
+}
+
+### dist/types.d.ts#InitResult
+export interface InitResult {
+    created: string[];
+    existing: string[];
+    indexesCreated: number;
+}
+
+### dist/types.d.ts#SeedConfig
+export interface SeedConfig {
+    uri: string;
+    dbName: string;
+    data: Record<string, object[]>;
+    clearFirst?: boolean;
+}
+
+### dist/types.d.ts#SeedResult
+export interface SeedResult {
+    inserted: Record<string, number>;
+    cleared: string[];
+}
