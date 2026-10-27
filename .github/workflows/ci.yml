@@ -18,4 +18,4 @@ concurrency:
 
 jobs:
   ci:
-    uses: mark1russell7/template/.github/workflows/reusable-ci.yml@c4764829ac2218f6fd7755130b8ae0f53dda9447 # main
+    uses: mark1russell7/template/.github/workflows/reusable-ci.yml@e7e62730936c2af2aab836d96f7553488375613b # main
