@@ -174,11 +174,11 @@ importers:
         specifier: ^0.2.0
         version: 0.2.0
       '@mark1russell7/conventions':
-        specifier: ^0.6.0
-        version: 0.6.0
+        specifier: ^0.7.0
+        version: 0.7.0
       '@mark1russell7/cue':
         specifier: ^1.0.2
-        version: 1.0.2
+        version: 1.1.0
       '@types/node':
         specifier: ^22.10.0
         version: 22.19.11
@@ -193,13 +193,13 @@ packages:
     engines: {node: '>=22'}
     hasBin: true
 
-  '@mark1russell7/conventions@0.6.0':
-    resolution: {integrity: sha512-Z+yVnLd6E2qQFUDC1n1o0g1ykk5LTCVa/1uCgrnAeOc8K5FZqXOwyT6ioqxD5HEe0P0UBRUkS/QQE21AQU2WhQ==}
+  '@mark1russell7/conventions@0.7.0':
+    resolution: {integrity: sha512-Wqd/PQ4/TghdmXl5h5RFcn6lXOYJCW98mpE8Um65Fv0o1QnglUjv+J54FMI846dxiZlmbyGDPWZNktB+rvvGmw==}
     engines: {node: '>=22'}
     hasBin: true
 
-  '@mark1russell7/cue@1.0.2':
-    resolution: {integrity: sha512-ketUJQeJ4eLSmw0X3NpWrGHxXVg30MpMfw/wYdzlpwf7J94BQmmOM80VuGL4OPC4tXczmTj5LWxNdM7NoQKgeA==}
+  '@mark1russell7/cue@1.1.0':
+    resolution: {integrity: sha512-R9pjuWNFqd/LSfOI8uY7w8E2Dri8UQFGLodBuV4d2E0pwzWM5ISVXWVhC7+aYgrR1GXSMzbyo5ZLWvqyQCwdIg==}
     engines: {node: '>=22'}
     hasBin: true
 
@@ -283,9 +283,9 @@ snapshots:
 
   '@mark1russell7/api-report@0.2.0': {}
 
-  '@mark1russell7/conventions@0.6.0': {}
+  '@mark1russell7/conventions@0.7.0': {}
 
-  '@mark1russell7/cue@1.0.2': {}
+  '@mark1russell7/cue@1.1.0': {}
 
   '@mongodb-js/saslprep@1.4.6':
     dependencies:
