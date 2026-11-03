@@ -45,8 +45,8 @@
   },
   "devDependencies": {
     "@mark1russell7/api-report": "^0.2.0",
-    "@mark1russell7/conventions": "^0.14.0",
-    "@mark1russell7/cue": "^1.0.2",
+    "@mark1russell7/conventions": "^0.25.0",
+    "@mark1russell7/cue": "^2.1.1",
     "@types/node": "^22.10.0",
     "typescript": "^5.7.0",
     "vitest": "^5.0.3"
