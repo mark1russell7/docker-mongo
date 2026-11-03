@@ -498,6 +498,8 @@ td.live output {
 .output {
   grid-area: output;
   display: grid;
+  /* One column that a long line cannot widen. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
 }
 
@@ -513,6 +515,8 @@ td.live output {
 
 .fields {
   display: grid;
+  /* One column that a long line cannot widen. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
 }
 
@@ -666,6 +670,8 @@ code.fn {
   padding: 0;
   list-style: none;
   display: grid;
+  /* One column that a long line cannot widen. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 6px;
 }
 
@@ -776,6 +782,8 @@ code.fn {
 
 .dry-in {
   display: grid;
+  /* One column that a long line cannot widen. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 4px;
 }
 
@@ -919,6 +927,8 @@ textarea[aria-invalid="true"] {
 
 .results {
   display: grid;
+  /* One column that a long line cannot widen. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
   margin-top: 12px;
 }
@@ -986,6 +996,8 @@ td.live .note {
 
 .cmds {
   display: grid;
+  /* One column that a long line cannot widen. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 4px;
 }
 
