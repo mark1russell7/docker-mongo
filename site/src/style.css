@@ -1022,9 +1022,11 @@ textarea[aria-invalid="true"] {
   color: var(--muted);
 }
 
-/* The API table */
-.api-table {
-  min-width: 46rem;
+/* The API table: above the phone width it has three columns. */
+@media (min-width: 641px) {
+  .api-table {
+    min-width: 46rem;
+  }
 }
 
 td.live .note {
