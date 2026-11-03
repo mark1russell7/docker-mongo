@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>docker-mongo: MongoDB in Docker Compose, live</title>
+    <meta name="description" content="Edit the settings of a MongoDB container, and see the connection string, the origin of each value and the docker-compose.yml change live. Then see a dry run of init and seed." />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2317192a'/%3E%3Cpath d='M16 4c5 5 6 11 0 22c-6-11-5-17 0-22z' fill='%2336c28f'/%3E%3Cpath d='M16 22v6' stroke='%2393abff' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E" />
+    <script>
+      // The saved theme applies before the first paint, so a dark page does not flash white.
+      try {
+        const t = localStorage.getItem("docker-mongo-theme");
+        if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+      } catch {}
+    </script>
+  </head>
+  <body>
+    <a class="skip" href="#try">Skip to the settings</a>
+    <header class="top">
+      <div class="brand">
+        <h1 class="wordmark"><span class="mark" aria-hidden="true"><i></i></span>docker-mongo</h1>
+        <p class="lead">
+          A MongoDB container for Docker Compose, with TypeScript helpers to connect, initialize and seed. Change a setting, and see the connection string and the
+          Compose file change.
+        </p>
+      </div>
+      <nav class="links" aria-label="Site">
+        <a href="#try">Try it</a>
+        <a href="#dry-run">Dry run</a>
+        <a href="#api">API</a>
+        <a href="#docker">Docker</a>
+        <a href="releases/">Releases</a>
+        <a href="status/">Status</a>
+        <a href="https://github.com/mark1russell7/docker-mongo">GitHub</a>
+        <button type="button" class="theme" id="theme" aria-label="Color theme">Theme: auto</button>
+      </nav>
+    </header>
+
+    <main>
+      <section id="try" class="core" aria-labelledby="try-title">
+        <h2 id="try-title" class="sr">Settings, connection string and Compose file</h2>
+        <div class="presets-row">
+          <span class="label" id="presets-label">Examples</span>
+          <div class="chips" id="presets" role="group" aria-labelledby="presets-label"></div>
+        </div>
+
+        <div class="card settings">
+          <div class="card-head">
+            <h3>Environment variables</h3>
+            <p class="hint">An empty field is not set, so its default applies. The values stay in your browser.</p>
+          </div>
+          <div class="fields" id="fields"></div>
+        </div>
+
+        <div class="card output">
+          <div class="uri-box" id="uri-box">
+            <span class="label">Connection string <code class="fn">connectionUri(settings)</code></span>
+            <div class="uri-row">
+              <output id="uri" class="mono"></output>
+              <button type="button" class="copy" id="copy-uri">Copy</button>
+            </div>
+            <div class="uri-foot">
+              <span class="hint mono" id="db-line"></span>
+              <label class="toggle" id="show-label"><input type="checkbox" id="show-password" /> Show the password</label>
+            </div>
+          </div>
+          <ul class="problems" id="problems" role="status" aria-live="polite"></ul>
+
+          <div class="resolved">
+            <span class="label">Resolved config <code class="fn">resolveMongoConfig(env)</code></span>
+            <p class="legend hint" aria-hidden="true">
+              <span class="src s-env">env</span> from a variable <span class="src s-default">default</span> from the package
+              <span class="src s-unset">unset</span> no value <span class="src s-invalid">invalid</span> a bad value, so the default applies
+            </p>
+            <div class="table-scroll">
+              <table class="resolved-table">
+                <thead>
+                  <tr><th scope="col">Setting</th><th scope="col">Value</th><th scope="col">From</th></tr>
+                </thead>
+                <tbody id="resolved"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="files">
+            <div class="seg" id="tabs" role="tablist" aria-label="Files"></div>
+            <div class="codeblock">
+              <pre id="file-pre" role="tabpanel" aria-labelledby="tab-compose"><code id="file-code"></code></pre>
+              <button type="button" class="copy" id="copy-file">Copy</button>
+            </div>
+            <p class="hint" id="file-note"></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="dry-run" class="section" aria-labelledby="dry-title">
+        <div class="section-head">
+          <h2 id="dry-title">Dry run of init and seed</h2>
+          <p class="hint">
+            The functions <code>initDatabase</code> and <code>seedDatabase</code> do the steps of <code>planInit</code> and <code>planSeed</code>. Edit the input, and see each step as a
+            <code>mongosh</code> command. Nothing connects to a server.
+          </p>
+        </div>
+        <div class="dry">
+          <div class="card dry-in">
+            <label class="label" for="collections">Collections of <code>initDatabase</code></label>
+            <textarea id="collections" class="mono" rows="9" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+            <p class="hint bad" id="collections-error" aria-live="polite"></p>
+            <label class="label" for="existing">Collections that exist on the server</label>
+            <input id="existing" class="mono" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="for example posts, sessions" />
+            <label class="label" for="seed">Data of <code>seedDatabase</code></label>
+            <textarea id="seed" class="mono" rows="8" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+            <p class="hint bad" id="seed-error" aria-live="polite"></p>
+            <label class="toggle"><input type="checkbox" id="clear-first" checked /> <code>clearFirst</code>: clear each collection before its insert</label>
+          </div>
+          <div class="card dry-out">
+            <div class="plan-head">
+              <span class="label">Steps</span>
+              <span class="hint" id="plan-count"></span>
+              <button type="button" class="copy inline" id="copy-plan">Copy the script</button>
+            </div>
+            <ol class="plan" id="plan" aria-label="The steps of init, then the steps of seed"></ol>
+            <div class="results" id="results"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="how" class="section" aria-labelledby="how-title">
+        <div class="section-head">
+          <h2 id="how-title">How it works</h2>
+        </div>
+        <ol class="how">
+          <li class="card"><span class="step">1</span><h3>Variables to settings</h3><p><code>resolveMongoConfig(process.env)</code> reads eight variables. An empty variable is not set, as in <code>${VAR:-default}</code> of Compose.</p></li>
+          <li class="card"><span class="step">2</span><h3>Settings to a URI</h3><p><code>connectionUri</code> encodes the user and the password. <code>connectionConfig</code> adds the database for <code>withConnection</code>.</p></li>
+          <li class="card"><span class="step">3</span><h3>Settings to Compose</h3><p><code>composeFile</code> writes the service. The port opens only on <code>127.0.0.1</code>, and the file never holds the password.</p></li>
+          <li class="card"><span class="step">4</span><h3>Plans to the driver</h3><p><code>initDatabase</code> and <code>seedDatabase</code> do the steps of their plans with the <code>mongodb</code> driver, in sequence.</p></li>
+        </ol>
+        <p class="hint">The entry <code>@mark1russell7/docker-mongo/pure</code> has steps 1 to 3 and the plans. It imports no driver and no Node.js module, so this page bundles it.</p>
+      </section>
+
+      <section id="api" class="section" aria-labelledby="api-title">
+        <div class="section-head">
+          <h2 id="api-title">API</h2>
+          <p class="hint">The page calls each example with the package, and shows the result.</p>
+        </div>
+        <div class="card table-card">
+          <div class="table-scroll">
+            <table class="api-table">
+              <thead>
+                <tr><th scope="col">Export</th><th scope="col">What it does</th><th scope="col">Live example</th></tr>
+              </thead>
+              <tbody id="api-rows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="docker" class="section" aria-labelledby="docker-title">
+        <div class="section-head">
+          <h2 id="docker-title">Docker commands</h2>
+          <p class="hint">
+            The shipped <code>docker-compose.yml</code> reads three variables: <code>MONGO_CONTAINER_NAME</code>, <code>MONGO_PORT</code> and <code>MONGO_DB_NAME</code>. For a user or a
+            replica set, save the file of <code>composeFile</code>.
+          </p>
+        </div>
+        <div class="card cmds">
+          <h3>Start with your settings</h3>
+          <div class="codeblock">
+            <pre><code id="up-cmd"></code></pre>
+            <button type="button" class="copy" data-copy="up-cmd">Copy</button>
+          </div>
+          <h3>Logs, stop and remove</h3>
+          <div class="codeblock">
+            <pre><code id="docker-cmds">docker compose logs -f mongodb
+docker compose down
+# This also removes the volumes, with all the data:
+docker compose down -v</code></pre>
+            <button type="button" class="copy" data-copy="docker-cmds">Copy</button>
+          </div>
+          <h3>From your project, after the install</h3>
+          <div class="codeblock">
+            <pre><code id="npm-cmds">docker compose -f node_modules/@mark1russell7/docker-mongo/docker-compose.yml up -d</code></pre>
+            <button type="button" class="copy" data-copy="npm-cmds">Copy</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="install" class="section" aria-labelledby="install-title">
+        <div class="section-head">
+          <h2 id="install-title">Install from npm</h2>
+        </div>
+        <div class="card install">
+          <div class="codeblock">
+            <pre><code id="install-cmd">npm install @mark1russell7/docker-mongo</code></pre>
+            <button type="button" class="copy" data-copy="install-cmd">Copy</button>
+          </div>
+          <div class="codeblock">
+            <pre><code id="sample">import { connectionConfig, initDatabase, resolveMongoConfig } from "@mark1russell7/docker-mongo";
+
+const { settings, problems } = resolveMongoConfig(process.env);
+if (problems.length &gt; 0) throw new Error(problems.join("\n"));
+
+await initDatabase({
+  ...connectionConfig(settings),
+  collections: [{ name: "users", indexes: [{ keys: { email: 1 }, options: { unique: true } }] }],
+});</code></pre>
+            <button type="button" class="copy" data-copy="sample">Copy</button>
+          </div>
+          <p class="hint">The package needs Node.js 20 or later, and Docker with Compose for the container.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <p>MIT license. <a href="https://github.com/mark1russell7/docker-mongo">github.com/mark1russell7/docker-mongo</a> · <span id="build"></span></p>
+    </footer>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

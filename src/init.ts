@@ -4,6 +4,7 @@
 
 import type { InitConfig, InitResult } from "./types.js";
 import { withConnection } from "./connect.js";
+import { planInit } from "./plan.js";
 
 /**
  * Initialize a MongoDB database with collections and indexes.
@@ -23,38 +24,31 @@ import { withConnection } from "./connect.js";
  */
 export async function initDatabase(config: InitConfig): Promise<InitResult> {
   return withConnection(config, async (db) => {
-    const result: InitResult = {
-      created: [],
-      existing: [],
-      indexesCreated: 0,
-    };
-
     // Get existing collections
     const existingCollections = await db.listCollections().toArray();
-    const existingNames = new Set(existingCollections.map((c) => c.name));
+    const plan = planInit(
+      config.collections,
+      existingCollections.map((c) => c.name)
+    );
 
-    // Create collections and indexes
-    for (const collectionConfig of config.collections) {
-      const { name, indexes } = collectionConfig;
-
-      if (existingNames.has(name)) {
-        result.existing.push(name);
+    // Do the steps of the plan, in sequence: each collection, then its indexes
+    let indexesCreated = 0;
+    for (const step of plan.steps) {
+      if (step.op === "createCollection") {
+        await db.createCollection(step.collection);
       } else {
-        await db.createCollection(name);
-        result.created.push(name);
-      }
-
-      // Create indexes if specified
-      if (indexes && indexes.length > 0) {
-        const collection = db.collection(name);
-        for (const indexConfig of indexes) {
-          await collection.createIndex(indexConfig.keys, indexConfig.options);
-          result.indexesCreated++;
-        }
+        await db
+          .collection(step.collection)
+          .createIndex(step.index.keys, step.index.options);
+        indexesCreated++;
       }
     }
 
-    return result;
+    return {
+      created: [...plan.created],
+      existing: [...plan.existing],
+      indexesCreated,
+    };
   });
 }
 

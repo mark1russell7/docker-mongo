@@ -4,22 +4,68 @@
 # and private members. The command `api-report check` compares this file with the built .d.ts files.
 # To accept a change of the API, start the build, then `api-report update`, and review the diff.
 
-## . (dist/index.d.ts): 14 names
+## . (dist/index.d.ts): 34 names
 
 type CollectionConfig: dist/types.d.ts#CollectionConfig
 type ConnectionCallback: dist/types.d.ts#ConnectionCallback
 type ConnectionConfig: dist/types.d.ts#ConnectionConfig
+type ConnectionUriOptions: dist/settings.d.ts#ConnectionUriOptions
 type IndexConfig: dist/types.d.ts#IndexConfig
 type InitConfig: dist/types.d.ts#InitConfig
+type InitPlan: dist/plan.d.ts#InitPlan
 type InitResult: dist/types.d.ts#InitResult
+type InitStep: dist/plan.d.ts#InitStep
+MONGO_DEFAULTS: dist/settings.d.ts#MONGO_DEFAULTS
+MONGO_ENV_VARS: dist/settings.d.ts#MONGO_ENV_VARS
+type MongoEnv: dist/settings.d.ts#MongoEnv
+type MongoSettingKey: dist/settings.d.ts#MongoSettingKey
+type MongoSettings: dist/settings.d.ts#MongoSettings
+type ResolvedMongoConfig: dist/settings.d.ts#ResolvedMongoConfig
+type ResolvedSetting: dist/settings.d.ts#ResolvedSetting
 type SeedConfig: dist/types.d.ts#SeedConfig
+type SeedPlan: dist/plan.d.ts#SeedPlan
 type SeedResult: dist/types.d.ts#SeedResult
+type SeedStep: dist/plan.d.ts#SeedStep
+type SettingSource: dist/settings.d.ts#SettingSource
+composeFile: dist/settings.d.ts#composeFile
+connectionConfig: dist/settings.d.ts#connectionConfig
+connectionUri: dist/settings.d.ts#connectionUri
 createConnection: dist/connect.d.ts#createConnection
 initDatabase: dist/init.d.ts#initDatabase
 initDatabaseWithLogging: dist/init.d.ts#initDatabaseWithLogging
+mongoshCommand: dist/plan.d.ts#mongoshCommand
+planInit: dist/plan.d.ts#planInit
+planSeed: dist/plan.d.ts#planSeed
+resolveMongoConfig: dist/settings.d.ts#resolveMongoConfig
 seedDatabase: dist/seed.d.ts#seedDatabase
 seedDatabaseWithLogging: dist/seed.d.ts#seedDatabaseWithLogging
 withConnection: dist/connect.d.ts#withConnection
+
+## ./pure (dist/pure.d.ts): 23 names
+
+type CollectionConfig: dist/types.d.ts#CollectionConfig
+type ConnectionConfig: dist/types.d.ts#ConnectionConfig
+type ConnectionUriOptions: dist/settings.d.ts#ConnectionUriOptions
+type IndexConfig: dist/types.d.ts#IndexConfig
+type InitPlan: dist/plan.d.ts#InitPlan
+type InitStep: dist/plan.d.ts#InitStep
+MONGO_DEFAULTS: dist/settings.d.ts#MONGO_DEFAULTS
+MONGO_ENV_VARS: dist/settings.d.ts#MONGO_ENV_VARS
+type MongoEnv: dist/settings.d.ts#MongoEnv
+type MongoSettingKey: dist/settings.d.ts#MongoSettingKey
+type MongoSettings: dist/settings.d.ts#MongoSettings
+type ResolvedMongoConfig: dist/settings.d.ts#ResolvedMongoConfig
+type ResolvedSetting: dist/settings.d.ts#ResolvedSetting
+type SeedPlan: dist/plan.d.ts#SeedPlan
+type SeedStep: dist/plan.d.ts#SeedStep
+type SettingSource: dist/settings.d.ts#SettingSource
+composeFile: dist/settings.d.ts#composeFile
+connectionConfig: dist/settings.d.ts#connectionConfig
+connectionUri: dist/settings.d.ts#connectionUri
+mongoshCommand: dist/plan.d.ts#mongoshCommand
+planInit: dist/plan.d.ts#planInit
+planSeed: dist/plan.d.ts#planSeed
+resolveMongoConfig: dist/settings.d.ts#resolveMongoConfig
 
 ## Declarations
 
@@ -38,11 +84,121 @@ export declare function initDatabase(config: InitConfig): Promise<InitResult>;
 ### dist/init.d.ts#initDatabaseWithLogging
 export declare function initDatabaseWithLogging(config: InitConfig): Promise<InitResult>;
 
+### dist/plan.d.ts#InitPlan
+export interface InitPlan {
+    readonly steps: readonly InitStep[];
+    readonly created: readonly string[];
+    readonly existing: readonly string[];
+    readonly indexes: number;
+}
+
+### dist/plan.d.ts#InitStep
+export type InitStep = {
+    readonly op: "createCollection";
+    readonly collection: string;
+} | {
+    readonly op: "createIndex";
+    readonly collection: string;
+    readonly index: IndexConfig;
+};
+
+### dist/plan.d.ts#SeedPlan
+export interface SeedPlan {
+    readonly steps: readonly SeedStep[];
+    readonly cleared: readonly string[];
+    readonly inserted: Readonly<Record<string, number>>;
+}
+
+### dist/plan.d.ts#SeedStep
+export type SeedStep = {
+    readonly op: "deleteMany";
+    readonly collection: string;
+} | {
+    readonly op: "insertMany";
+    readonly collection: string;
+    readonly documents: readonly object[];
+};
+
+### dist/plan.d.ts#mongoshCommand
+export declare function mongoshCommand(step: InitStep | SeedStep): string;
+
+### dist/plan.d.ts#planInit
+export declare function planInit(collections: readonly CollectionConfig[], existing: Iterable<string>): InitPlan;
+
+### dist/plan.d.ts#planSeed
+export declare function planSeed(data: Readonly<Record<string, readonly object[]>>, clearFirst?: boolean): SeedPlan;
+
 ### dist/seed.d.ts#seedDatabase
 export declare function seedDatabase(config: SeedConfig): Promise<SeedResult>;
 
 ### dist/seed.d.ts#seedDatabaseWithLogging
 export declare function seedDatabaseWithLogging(config: SeedConfig): Promise<SeedResult>;
+
+### dist/settings.d.ts#ConnectionUriOptions
+export interface ConnectionUriOptions {
+    readonly redact?: boolean;
+}
+
+### dist/settings.d.ts#MONGO_DEFAULTS
+export declare const MONGO_DEFAULTS: {
+    readonly host: string;
+    readonly port: number;
+    readonly dbName: string;
+    readonly authSource: string;
+    readonly containerName: string;
+};
+
+### dist/settings.d.ts#MONGO_ENV_VARS
+export declare const MONGO_ENV_VARS: Readonly<Record<MongoSettingKey, string>>;
+
+### dist/settings.d.ts#MongoEnv
+export type MongoEnv = Readonly<Record<string, string | undefined>>;
+
+### dist/settings.d.ts#MongoSettingKey
+export type MongoSettingKey = "host" | "port" | "dbName" | "user" | "password" | "authSource" | "replicaSet" | "containerName";
+
+### dist/settings.d.ts#MongoSettings
+export interface MongoSettings {
+    readonly host: string;
+    readonly port: number;
+    readonly dbName: string;
+    readonly user?: string;
+    readonly password?: string;
+    readonly authSource?: string;
+    readonly replicaSet?: string;
+    readonly containerName: string;
+}
+
+### dist/settings.d.ts#ResolvedMongoConfig
+export interface ResolvedMongoConfig {
+    readonly settings: MongoSettings;
+    readonly entries: readonly ResolvedSetting[];
+    readonly problems: readonly string[];
+}
+
+### dist/settings.d.ts#ResolvedSetting
+export interface ResolvedSetting {
+    readonly key: MongoSettingKey;
+    readonly variable: string;
+    readonly value: string | undefined;
+    readonly source: SettingSource;
+    readonly problem?: string;
+}
+
+### dist/settings.d.ts#SettingSource
+export type SettingSource = "env" | "default" | "unset" | "invalid";
+
+### dist/settings.d.ts#composeFile
+export declare function composeFile(settings: MongoSettings): string;
+
+### dist/settings.d.ts#connectionConfig
+export declare function connectionConfig(settings: MongoSettings): ConnectionConfig;
+
+### dist/settings.d.ts#connectionUri
+export declare function connectionUri(settings: MongoSettings, options?: ConnectionUriOptions): string;
+
+### dist/settings.d.ts#resolveMongoConfig
+export declare function resolveMongoConfig(env: MongoEnv): ResolvedMongoConfig;
 
 ### dist/types.d.ts#CollectionConfig
 export interface CollectionConfig {

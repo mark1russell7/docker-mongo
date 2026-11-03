@@ -51,3 +51,29 @@ export { initDatabase, initDatabaseWithLogging } from "./init.js";
 
 // Database seeding
 export { seedDatabase, seedDatabaseWithLogging } from "./seed.js";
+
+// Settings, connection string, Compose file and plans (also at the entry "./pure", with no driver)
+export type {
+  ConnectionUriOptions,
+  InitPlan,
+  InitStep,
+  MongoEnv,
+  MongoSettingKey,
+  MongoSettings,
+  ResolvedMongoConfig,
+  ResolvedSetting,
+  SeedPlan,
+  SeedStep,
+  SettingSource,
+} from "./pure.js";
+export {
+  composeFile,
+  connectionConfig,
+  connectionUri,
+  MONGO_DEFAULTS,
+  MONGO_ENV_VARS,
+  mongoshCommand,
+  planInit,
+  planSeed,
+  resolveMongoConfig,
+} from "./pure.js";

@@ -4,6 +4,7 @@
 
 import type { SeedConfig, SeedResult } from "./types.js";
 import { withConnection } from "./connect.js";
+import { planSeed } from "./plan.js";
 
 /**
  * Seed a MongoDB database with data.
@@ -28,29 +29,22 @@ import { withConnection } from "./connect.js";
  * ```
  */
 export async function seedDatabase(config: SeedConfig): Promise<SeedResult> {
-  const clearFirst = config.clearFirst ?? true;
+  const plan = planSeed(config.data, config.clearFirst ?? true);
 
   return withConnection(config, async (db) => {
     const result: SeedResult = {
-      inserted: {},
-      cleared: [],
+      inserted: { ...plan.inserted },
+      cleared: [...plan.cleared],
     };
 
-    for (const [collectionName, documents] of Object.entries(config.data)) {
-      const collection = db.collection(collectionName);
-
-      // Clear existing data if requested
-      if (clearFirst) {
+    // Do the steps of the plan, in sequence: the clear of a collection, then its insert
+    for (const step of plan.steps) {
+      const collection = db.collection(step.collection);
+      if (step.op === "deleteMany") {
         await collection.deleteMany({});
-        result.cleared.push(collectionName);
-      }
-
-      // Insert new data
-      if (documents.length > 0) {
-        const insertResult = await collection.insertMany(documents);
-        result.inserted[collectionName] = insertResult.insertedCount;
       } else {
-        result.inserted[collectionName] = 0;
+        const insertResult = await collection.insertMany([...step.documents]);
+        result.inserted[step.collection] = insertResult.insertedCount;
       }
     }
 

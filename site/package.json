@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json.schemastore.org/package",
+  "name": "@docker-mongo/site",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "The GitHub Pages site of docker-mongo: edit the settings, and see the connection string, the Compose file and the plans of init and seed.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.test.json"
+  },
+  "dependencies": {
+    "@mark1russell7/docker-mongo": "workspace:*",
+    "@mark1russell7/site-pages": "^0.1.10"
+  },
+  "devDependencies": {
+    "@mark1russell7/cue": "^1.0.2",
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.3"
+  }
+}

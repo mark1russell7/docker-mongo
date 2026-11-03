@@ -1,3 +1,10 @@
+# The site of GitHub Pages is a private package of the workspace. The root is the published package.
+packages:
+  - "site"
+
+# Packages allowed to run install scripts. A git-hosted package is approved by its repository URL.
+allowBuilds:
+  esbuild: true
 minimumReleaseAgeExclude:
   # Our own packages: the release train updates them, so the release age check of pnpm does not apply to them.
   - '@mark1russell7/*'
