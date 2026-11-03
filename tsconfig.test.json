@@ -3,8 +3,9 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "noEmit": true,
-    "rootDir": "${configDir}"
+    "rootDir": "${configDir}",
+    "isolatedDeclarations": false
   },
-  "include": ["${configDir}/src/**/*", "${configDir}/test/**/*"],
+  "include": ["${configDir}/src/**/*", "${configDir}/test/**/*", "${configDir}/*.config.ts"],
   "exclude": ["${configDir}/node_modules", "${configDir}/dist"]
 }

@@ -7,6 +7,8 @@
 
 > Reusable MongoDB Docker setup with TypeScript utilities for initialization, seeding, and connection management.
 
+**Try it live:** [mark1russell7.github.io/docker-mongo](https://mark1russell7.github.io/docker-mongo/). Change a setting, and see the connection string, the origin of each value and the `docker-compose.yml`. The page also shows a dry run of init and seed.
+
 ## Overview
 
 `@mark1russell7/docker-mongo` provides a complete MongoDB development environment with:
@@ -219,6 +221,42 @@ docker run --rm -v docker-mongo_mongodb_data:/data -v $(pwd):/backup ubuntu tar 
 ```
 
 ## TypeScript API
+
+### Settings, Connection String and Compose File
+
+These functions have no driver and no I/O. The entry `@mark1russell7/docker-mongo/pure` has them with no `mongodb` import, so a browser can use them too.
+
+| Function | What it does |
+|----------|--------------|
+| `resolveMongoConfig(env)` | Reads the settings from environment variables. It gives the origin of each value (`env`, `default`, `unset` or `invalid`) and each problem. |
+| `connectionUri(settings, { redact? })` | Builds the connection string. It encodes the user and the password. `redact: true` shows `****` for the password. |
+| `connectionConfig(settings)` | Gives the `{ uri, dbName }` of `withConnection`, `initDatabase` and `seedDatabase`. |
+| `composeFile(settings)` | Writes the `docker-compose.yml` of the settings. With the defaults, it is the file of this package. The file never holds the password. |
+| `planInit(collections, existing)` | Gives the steps of `initDatabase`: each new collection, then its indexes. |
+| `planSeed(data, clearFirst?)` | Gives the steps of `seedDatabase`: the clear of each collection, then its insert. |
+| `mongoshCommand(step)` | Writes a step of a plan as a `mongosh` command. |
+
+```typescript
+import { connectionConfig, resolveMongoConfig, withConnection } from '@mark1russell7/docker-mongo';
+
+const { settings, problems } = resolveMongoConfig(process.env);
+if (problems.length > 0) throw new Error(problems.join('\n'));
+
+await withConnection(connectionConfig(settings), (db) => db.command({ ping: 1 }));
+```
+
+`resolveMongoConfig` reads these variables. An empty variable is not set, as in `${VAR:-default}` of Compose.
+
+| Variable | Default | Setting |
+|----------|---------|---------|
+| `MONGO_HOST` | `localhost` | The host of the connection string |
+| `MONGO_PORT` | `27017` | The port on the host |
+| `MONGO_DB_NAME` | `app` | The database |
+| `MONGO_USER` | none | The user, and the root user of the container |
+| `MONGO_PASSWORD` | none | The password of the user |
+| `MONGO_AUTH_SOURCE` | `admin` with a user | The database that has the user |
+| `MONGO_REPLICA_SET` | none | The name of the replica set |
+| `MONGO_CONTAINER_NAME` | `mongo-db` | The name of the container |
 
 ### Connection Management
 
