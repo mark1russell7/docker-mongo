@@ -64,4 +64,12 @@ check(
   `${$$("#api-rows tr").length} rows, ${$$("#api-rows output").length} outputs`,
 );
 
+// The card clips the table, so the page has no overflow when the table is too wide. This step measures the table.
+const apiScroller = document.querySelector<HTMLElement>("#api .table-scroll");
+check(
+  "the API table fits its card at each width of the check",
+  apiScroller !== null && apiScroller.scrollWidth <= apiScroller.clientWidth,
+  `${apiScroller?.scrollWidth} in ${apiScroller?.clientWidth}`,
+);
+
 export {};
