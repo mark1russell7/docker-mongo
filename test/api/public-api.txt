@@ -4,7 +4,7 @@
 # and private members. The command `api-report check` compares this file with the built .d.ts files.
 # To accept a change of the API, start the build, then `api-report update`, and review the diff.
 
-## . (dist/index.d.ts): 34 names
+## . (dist/index.d.ts): names
 
 type CollectionConfig: dist/types.d.ts#CollectionConfig
 type ConnectionCallback: dist/types.d.ts#ConnectionCallback
@@ -41,7 +41,7 @@ seedDatabase: dist/seed.d.ts#seedDatabase
 seedDatabaseWithLogging: dist/seed.d.ts#seedDatabaseWithLogging
 withConnection: dist/connect.d.ts#withConnection
 
-## ./pure (dist/pure.d.ts): 23 names
+## ./pure (dist/pure.d.ts): names
 
 type CollectionConfig: dist/types.d.ts#CollectionConfig
 type ConnectionConfig: dist/types.d.ts#ConnectionConfig
