@@ -258,6 +258,20 @@ await withConnection(connectionConfig(settings), (db) => db.command({ ping: 1 })
 | `MONGO_REPLICA_SET` | none | The name of the replica set |
 | `MONGO_CONTAINER_NAME` | `mongo-db` | The name of the container |
 
+`MONGO_USER` needs `MONGO_PASSWORD`. The container makes its root user only with both, so `resolveMongoConfig` reports a user with no password.
+
+#### A replica set
+
+With `MONGO_REPLICA_SET`, `mongod` starts with `--replSet`. Start `rs.initiate()` one time after the first start, as the user when the settings have one:
+
+```bash
+docker exec mongo-db mongosh -u app -p --authenticationDatabase admin --eval "rs.initiate()"
+```
+
+- The set has one member: the container. `rs.initiate()` records it by the host name of the container and port 27017. That name does not resolve on the host, so `connectionUri` adds `directConnection=true`.
+- With a user, `mongod` refuses a replica set with no key file. So the Compose file then makes a key file in the configuration volume (`/data/configdb/keyfile`) at the first start, and starts `mongod` with `--keyFile`.
+- `pnpm test:docker` starts each kind of Compose file and connects to it. It needs Docker. CI starts it in `compose.yml`.
+
 ### Connection Management
 
 #### `withConnection<T>(config, callback): Promise<T>`
