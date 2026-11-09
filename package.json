@@ -49,6 +49,7 @@
     "@mark1russell7/conventions": "^0.37.1",
     "@mark1russell7/cue": "^2.1.1",
     "@types/node": "^22.10.0",
+    "@vitest/coverage-v8": "^5.0.3",
     "typescript": "^5.7.0",
     "vitest": "^5.0.3"
   },
