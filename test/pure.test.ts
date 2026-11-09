@@ -71,6 +71,12 @@ describe("resolveMongoConfig", () => {
     }
   });
 
+  it("reports a user with no password: the container makes no user", () => {
+    const result = resolveMongoConfig({ MONGO_USER: "app" });
+    expect(result.problems).toEqual(["MONGO_USER needs MONGO_PASSWORD: without it, the container makes no user."]);
+    expect(resolveMongoConfig({ MONGO_USER: "app", MONGO_PASSWORD: "x" }).problems).toEqual([]);
+  });
+
   it("reports a password with no user, and ignores it", () => {
     const result = resolveMongoConfig({ MONGO_PASSWORD: "change-me" });
     expect(result.problems).toEqual(["MONGO_PASSWORD has no effect without MONGO_USER."]);
@@ -85,8 +91,16 @@ describe("connectionUri", () => {
 
   it("encodes the user and the password, and adds authSource and replicaSet", () => {
     const { settings } = resolveMongoConfig({ MONGO_USER: "dev@team", MONGO_PASSWORD: "p@ss:w/rd", MONGO_REPLICA_SET: "rs0", MONGO_HOST: "db.local" });
-    expect(connectionUri(settings)).toBe("mongodb://dev%40team:p%40ss%3Aw%2Frd@db.local:27017/?authSource=admin&replicaSet=rs0");
-    expect(connectionUri(settings, { redact: true })).toBe("mongodb://dev%40team:****@db.local:27017/?authSource=admin&replicaSet=rs0");
+    expect(connectionUri(settings)).toBe("mongodb://dev%40team:p%40ss%3Aw%2Frd@db.local:27017/?authSource=admin&replicaSet=rs0&directConnection=true");
+    expect(connectionUri(settings, { redact: true })).toBe("mongodb://dev%40team:****@db.local:27017/?authSource=admin&replicaSet=rs0&directConnection=true");
+  });
+
+  it("connects directly to the one member of a replica set: its recorded host does not resolve from the host", () => {
+    const { settings } = resolveMongoConfig({ MONGO_REPLICA_SET: "rs0", MONGO_PORT: "27018" });
+    const uri = new URL(connectionUri(settings));
+    expect(uri.searchParams.get("replicaSet")).toBe("rs0");
+    expect(uri.searchParams.get("directConnection")).toBe("true");
+    expect(new URL(connectionUri(resolveMongoConfig({}).settings)).searchParams.has("directConnection")).toBe(false);
   });
 
   it("changes when a setting changes", () => {
@@ -107,13 +121,33 @@ describe("composeFile", () => {
   });
 
   it("puts the settings in the file, but not the password", () => {
-    const { settings } = resolveMongoConfig({ MONGO_PORT: "27018", MONGO_CONTAINER_NAME: "shop-db", MONGO_USER: "app", MONGO_PASSWORD: "change-me", MONGO_REPLICA_SET: "rs0" });
+    const { settings } = resolveMongoConfig({ MONGO_PORT: "27018", MONGO_CONTAINER_NAME: "shop-db", MONGO_USER: "app", MONGO_PASSWORD: "change-me" });
     const text = composeFile(settings);
     expect(text).toContain('- "127.0.0.1:27018:27017"');
     expect(text).toContain("container_name: shop-db");
     expect(text).toContain("- MONGO_INITDB_ROOT_USERNAME=app");
     expect(text).toContain('- "MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}"');
+    expect(text).not.toContain("change-me");
+  });
+
+  it("starts a replica set with no user by --replSet only", () => {
+    const text = composeFile(resolveMongoConfig({ MONGO_REPLICA_SET: "rs0" }).settings);
     expect(text).toContain('command: ["--replSet", "rs0"]');
+    expect(text).not.toContain("keyFile");
+  });
+
+  it("gives a replica set with a user a key file: mongod refuses authorization with a replica set and no key file", () => {
+    const { settings } = resolveMongoConfig({ MONGO_USER: "app", MONGO_PASSWORD: "change-me", MONGO_REPLICA_SET: "rs'0" });
+    const text = composeFile(settings);
+    expect(text).not.toContain("command:");
+    const line = text.split("\n").find((l) => l.startsWith("    entrypoint: "));
+    expect(line).toBeDefined();
+    const [shell, flag, script] = JSON.parse(line!.slice("    entrypoint: ".length)) as string[];
+    expect([shell, flag]).toEqual(["bash", "-c"]);
+    expect(script).toContain("[ -f /data/configdb/keyfile ] || head -c 756 /dev/urandom | base64 > /data/configdb/keyfile");
+    expect(script).toContain("chmod 400 /data/configdb/keyfile; chown mongodb:mongodb /data/configdb/keyfile");
+    expect(script).toContain("exec docker-entrypoint.sh mongod --replSet 'rs'\\''0' --keyFile /data/configdb/keyfile");
+    expect(script).not.toContain("$");
     expect(text).not.toContain("change-me");
   });
 

@@ -35,6 +35,7 @@
     "build": "tsc -b",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json && pnpm --filter @docker-mongo/site run typecheck",
     "test": "vitest run && pnpm --filter @docker-mongo/site run test",
+    "test:docker": "vitest run --config vitest.docker.config.ts",
     "clean": "rm -rf dist",
     "prepare": "npm run build",
     "check:conventions": "conventions check",

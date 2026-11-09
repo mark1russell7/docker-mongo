@@ -151,6 +151,10 @@ export function resolveMongoConfig(env: MongoEnv): ResolvedMongoConfig {
   if (password !== undefined && user === undefined) {
     problems.push(`${MONGO_ENV_VARS.password} has no effect without ${MONGO_ENV_VARS.user}.`);
   }
+  if (user !== undefined && password === undefined) {
+    // The container makes its root user only with both, so the server has no such user.
+    problems.push(`${MONGO_ENV_VARS.user} needs ${MONGO_ENV_VARS.password}: without it, the container makes no user.`);
+  }
 
   // The default of authSource applies only with a user.
   const defaults: Partial<Record<MongoSettingKey, string>> = user === undefined ? DEFAULT_TEXT : { ...DEFAULT_TEXT, authSource: MONGO_DEFAULTS.authSource };
@@ -189,6 +193,11 @@ export interface ConnectionUriOptions {
  * This function builds the MongoDB connection string of the settings. It encodes the user and the
  * password. The database is not in the string: `connectionConfig` gives it separately.
  *
+ * With a replica set, the string has `directConnection=true`. The container is the one member of
+ * the set, and the set records it by a host name of the container (`rs.initiate()` with no
+ * configuration). That name and its port do not resolve from the host, so the driver must not
+ * change to the hosts of the set.
+ *
  * @example
  * ```typescript
  * connectionUri({ host: "localhost", port: 27018, dbName: "app", containerName: "mongo-db" });
@@ -203,7 +212,7 @@ export function connectionUri(settings: MongoSettings, options: ConnectionUriOpt
   }
   const params: string[] = [];
   if (settings.user !== undefined) params.push(`authSource=${encodeURIComponent(settings.authSource ?? MONGO_DEFAULTS.authSource)}`);
-  if (settings.replicaSet !== undefined) params.push(`replicaSet=${encodeURIComponent(settings.replicaSet)}`);
+  if (settings.replicaSet !== undefined) params.push(`replicaSet=${encodeURIComponent(settings.replicaSet)}`, "directConnection=true");
   const query = params.length === 0 ? "" : `/?${params.join("&")}`;
   return `mongodb://${auth}${settings.host}:${settings.port}${query}`;
 }
@@ -223,27 +232,63 @@ function literal(value: string): string {
   return value.replaceAll("$", "$$$$");
 }
 
+/** This function writes a string as one word of a POSIX shell, in single quotes. */
+function shellWord(value: string): string {
+  return `'${value.replaceAll("'", "'\\''")}'`;
+}
+
+/** The key file of the members of a replica set with authorization. It is on the volume of the configuration, so a restart keeps it. */
+const MONGO_KEY_FILE = "/data/configdb/keyfile";
+
+/**
+ * This function gives the entrypoint of a replica set with authorization. A root user turns on
+ * authorization, and `mongod` then refuses `--replSet` without `--keyFile`. The entrypoint makes the
+ * key file one time (756 random bytes in base64, as the MongoDB manual tells), gives it to the user
+ * `mongodb` with mode 400, and then starts the entrypoint of the image.
+ */
+function keyFileEntrypoint(replicaSet: string): string[] {
+  const script = [
+    "set -e",
+    `[ -f ${MONGO_KEY_FILE} ] || head -c 756 /dev/urandom | base64 > ${MONGO_KEY_FILE}`,
+    `chmod 400 ${MONGO_KEY_FILE}`,
+    `chown mongodb:mongodb ${MONGO_KEY_FILE}`,
+    `exec docker-entrypoint.sh mongod --replSet ${shellWord(literal(replicaSet))} --keyFile ${MONGO_KEY_FILE}`,
+  ].join("; ");
+  return ["bash", "-c", script];
+}
+
 /**
  * This function writes the `docker-compose.yml` of the settings, with each value resolved. With the
  * defaults, it is the `docker-compose.yml` of this package.
  *
  * - The port is open only on `127.0.0.1` of the host.
+ * - `GLIBC_TUNABLES=glibc.pthread.rseq=1` lets `mongod` 8.0 start on Linux 6.19 and newer (SERVER-121912).
  * - With a user and a password, the container makes a root user. The file does not hold the password:
  *   Compose reads `${MONGO_PASSWORD}` from the environment.
  * - With a replica set, `mongod` starts with `--replSet`. Start `rs.initiate()` one time after the first start.
+ * - With a replica set and a user, the container also makes a key file, because `mongod` refuses a
+ *   replica set with authorization and no key file. Start `rs.initiate()` as the user.
  */
 export function composeFile(settings: MongoSettings): string {
-  const environment = [`MONGO_INITDB_DATABASE=${settings.dbName}`];
-  if (settings.user !== undefined && settings.password !== undefined) {
+  // mongod 8.0 refuses to start on Linux 6.19 to 7.0.13 (SERVER-121912). With rseq kept by glibc,
+  // TCMalloc uses per-thread caches and mongod starts. Remove it when a mongo:8.0 image starts without it.
+  const environment = [`MONGO_INITDB_DATABASE=${settings.dbName}`, "GLIBC_TUNABLES=glibc.pthread.rseq=1"];
+  const auth = settings.user !== undefined && settings.password !== undefined;
+  if (auth) {
     environment.push(`MONGO_INITDB_ROOT_USERNAME=${literal(settings.user)}`);
     environment.push(`MONGO_INITDB_ROOT_PASSWORD=\${${MONGO_ENV_VARS.password}}`);
+  }
+  const start: string[] = [];
+  if (settings.replicaSet !== undefined) {
+    if (auth) start.push(`    entrypoint: ${JSON.stringify(keyFileEntrypoint(settings.replicaSet))}`);
+    else start.push(`    command: ["--replSet", ${JSON.stringify(literal(settings.replicaSet))}]`);
   }
   const lines = [
     "services:",
     "  mongodb:",
     "    image: mongo:8.0",
     `    container_name: ${settings.containerName}`,
-    ...(settings.replicaSet === undefined ? [] : [`    command: ["--replSet", ${JSON.stringify(literal(settings.replicaSet))}]`]),
+    ...start,
     "    ports:",
     `      - "127.0.0.1:${settings.port}:27017"`,
     "    volumes:",

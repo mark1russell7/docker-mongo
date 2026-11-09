@@ -22,6 +22,9 @@ services:
       - mongodb_config:/data/configdb
     environment:
       - MONGO_INITDB_DATABASE=${MONGO_DB_NAME:-app}
+      # mongod 8.0 refuses to start on Linux 6.19 to 7.0.13 (SERVER-121912): glibc keeps rseq, so TCMalloc
+      # uses per-thread caches. Remove this line when a mongo:8.0 image starts on those kernels without it.
+      - GLIBC_TUNABLES=glibc.pthread.rseq=1
     healthcheck:
       test: mongosh --eval "db.adminCommand('ping')"
       interval: 10s
