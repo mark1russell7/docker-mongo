@@ -262,6 +262,7 @@ function keyFileEntrypoint(replicaSet: string): string[] {
  * defaults, it is the `docker-compose.yml` of this package.
  *
  * - The port is open only on `127.0.0.1` of the host.
+ * - `GLIBC_TUNABLES=glibc.pthread.rseq=1` lets `mongod` 8.0 start on Linux 6.19 and newer (SERVER-121912).
  * - With a user and a password, the container makes a root user. The file does not hold the password:
  *   Compose reads `${MONGO_PASSWORD}` from the environment.
  * - With a replica set, `mongod` starts with `--replSet`. Start `rs.initiate()` one time after the first start.
@@ -269,7 +270,9 @@ function keyFileEntrypoint(replicaSet: string): string[] {
  *   replica set with authorization and no key file. Start `rs.initiate()` as the user.
  */
 export function composeFile(settings: MongoSettings): string {
-  const environment = [`MONGO_INITDB_DATABASE=${settings.dbName}`];
+  // mongod 8.0 refuses to start on Linux 6.19 to 7.0.13 (SERVER-121912). With rseq kept by glibc,
+  // TCMalloc uses per-thread caches and mongod starts. Remove it when a mongo:8.0 image starts without it.
+  const environment = [`MONGO_INITDB_DATABASE=${settings.dbName}`, "GLIBC_TUNABLES=glibc.pthread.rseq=1"];
   const auth = settings.user !== undefined && settings.password !== undefined;
   if (auth) {
     environment.push(`MONGO_INITDB_ROOT_USERNAME=${literal(settings.user)}`);
