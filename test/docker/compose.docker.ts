@@ -70,7 +70,14 @@ describe("the Compose file of the settings starts a server that the connection s
       const file = join(dir, "docker-compose.yml");
       writeFileSync(file, composeFile(settings));
       started.push({ project, file, dir, env });
-      compose(project, file, env, "up", "-d", "--wait", "--wait-timeout", "180");
+      try {
+        compose(project, file, env, "up", "-d", "--wait", "--wait-timeout", "180");
+      } catch (error) {
+        // The logs and the state of the container tell why it did not become healthy.
+        compose(project, file, env, "logs", "--no-color", "--tail", "60");
+        execFileSync("docker", ["inspect", "--format", "{{json .State}}", project], { stdio: "inherit" });
+        throw error;
+      }
       if (settings.replicaSet !== undefined) await initiate(project, settings.user);
 
       const count = await withConnection(connectionConfig(settings), async (db) => {
