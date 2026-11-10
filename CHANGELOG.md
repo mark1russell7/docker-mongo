@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.3
+
+A PATCH release, with no change to the API.
+
+- The package does not ship `dist/.tsbuildinfo`. This file is a build cache of TypeScript, and the code does not use it.
+- The development tools are newer: `@mark1russell7/api-report` 0.5.3 and `@mark1russell7/conventions` 0.40.6.
+
 ## 0.1.2
 
 A PATCH release: bug fixes, with no change to the API.
