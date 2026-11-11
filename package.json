@@ -47,7 +47,7 @@
   },
   "devDependencies": {
     "@mark1russell7/api-report": "^0.5.3",
-    "@mark1russell7/conventions": "^0.40.6",
+    "@mark1russell7/conventions": "^0.41.0",
     "@mark1russell7/cue": "^2.1.1",
     "@types/node": "^22.10.0",
     "@vitest/coverage-v8": "^5.0.3",
