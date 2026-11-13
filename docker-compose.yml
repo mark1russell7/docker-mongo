@@ -12,7 +12,7 @@
 
 services:
   mongodb:
-    image: mongo:8.0
+    image: mongo:8.2
     container_name: ${MONGO_CONTAINER_NAME:-mongo-db}
     ports:
       # Loopback only: this MongoDB has no authentication, so it must not be reachable from the network
