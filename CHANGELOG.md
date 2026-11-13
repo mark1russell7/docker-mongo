@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.4
+
+An automated dependency update changes the shipped files, so this PATCH ships them.
+
 ## 0.1.3
 
 A PATCH release, with no change to the API.
